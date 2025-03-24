@@ -1,7 +1,9 @@
 import streamlit as st
 
 def evaluar_ingreso(mujer):
-    """Evalúa si una mujer puede ingresar al refugio según los criterios."""
+    """
+    Evalúa si una mujer puede ingresar al refugio según los criterios actualizados.
+    """
     inclusion = (
         mujer.get("situacion_violencia", False) and
         mujer.get("riesgo_vida_integridad", False) and
@@ -9,28 +11,28 @@ def evaluar_ingreso(mujer):
         (
             not mujer.get("redes_apoyo", True) or  
             mujer.get("indigena", False) or  
-            (
-                mujer.get("victima_delito", False) and
-                not mujer.get("vinculo_delincuencia", False) and
-                mujer.get("sin_redes_apoyo_viables", False) and
-                mujer.get("pleno_ejercicio_derechos", True)
-            ) or
-            (
-                mujer.get("diagnostico_psiquiatrico", False) and
-                mujer.get("tratamiento_manejable", True)
-            )
+            mujer.get("pleno_ejercicio_derechos", True)
+        ) and
+        (
+            not mujer.get("diagnostico_psiquiatrico_riesgoso", False)
+        ) and
+        (
+            not mujer.get("consumo_sustancias_reciente", False)
+        ) and
+        (
+            not mujer.get("riesgo_suicidio", False)
+        ) and
+        (
+            mujer.get("hijos_menores_14", True)
         )
     )
     
     exclusion = (
         mujer.get("vinculo_delincuencia", False) or
         mujer.get("enfermedad_cronica", False) or
-        (
-            mujer.get("diagnostico_psiquiatrico", False) and
-            not mujer.get("tratamiento_manejable", True)
-        ) or
-        (mujer.get("consumo_sustancias", False) and mujer.get("consumo_reciente", False)) or
-        mujer.get("riesgo_suicidio_alto", False)
+        mujer.get("diagnostico_psiquiatrico_riesgoso", False) or
+        mujer.get("consumo_sustancias_reciente", False) or
+        mujer.get("riesgo_suicidio", False)
     )
     
     if inclusion and not exclusion:
@@ -40,40 +42,35 @@ def evaluar_ingreso(mujer):
 
 st.title("Evaluación de Ingreso al Refugio")
 
-situacion_violencia = st.checkbox("Situación de violencia")
-riesgo_vida_integridad = st.checkbox("Riesgo de vida e integridad")
+situacion_violencia = st.checkbox("Situación de violencia que pone en riesgo la vida")
+riesgo_vida_integridad = st.checkbox("Riesgo de vida e integridad física")
 mayor_edad = st.checkbox("Mayor de edad")
+hijos_menores_14 = st.checkbox("Tiene hijos menores de 14 años")
 redes_apoyo = st.checkbox("Cuenta con redes de apoyo")
 indigena = st.checkbox("Es indígena")
-victima_delito = st.checkbox("Víctima de delito")
-vinculo_delincuencia = st.checkbox("Vinculada a delincuencia organizada o trata")
-sin_redes_apoyo_viables = st.checkbox("Sin redes de apoyo viables")
 pleno_ejercicio_derechos = st.checkbox("En pleno ejercicio de sus derechos")
-diagnostico_psiquiatrico = st.checkbox("Diagnóstico psiquiátrico")
-tratamiento_manejable = st.checkbox("En tratamiento psiquiátrico manejable")
-enfermedad_cronica = st.checkbox("Padece enfermedad crónica grave")
-consumo_sustancias = st.checkbox("Consumo de sustancias")
-consumo_reciente = st.checkbox("Consumo reciente de sustancias")
-riesgo_suicidio_alto = st.checkbox("Riesgo alto de suicidio")
+vinculo_delincuencia = st.checkbox("Vinculada a delincuencia organizada o trata")
+enfermedad_cronica = st.checkbox("Padece enfermedad crónica o degenerativa")
+diagnostico_psiquiatrico_riesgoso = st.checkbox("Diagnóstico psiquiátrico que pone en riesgo su seguridad o la de otros")
+consumo_sustancias_reciente = st.checkbox("Consumo reciente de sustancias (menos de un mes)")
+riesgo_suicidio = st.checkbox("Riesgo de suicidio (intento en el último año)")
 
 datos_mujer = {
     "situacion_violencia": situacion_violencia,
     "riesgo_vida_integridad": riesgo_vida_integridad,
     "mayor_edad": mayor_edad,
+    "hijos_menores_14": hijos_menores_14,
     "redes_apoyo": redes_apoyo,
     "indigena": indigena,
-    "victima_delito": victima_delito,
-    "vinculo_delincuencia": vinculo_delincuencia,
-    "sin_redes_apoyo_viables": sin_redes_apoyo_viables,
     "pleno_ejercicio_derechos": pleno_ejercicio_derechos,
-    "diagnostico_psiquiatrico": diagnostico_psiquiatrico,
-    "tratamiento_manejable": tratamiento_manejable,
+    "vinculo_delincuencia": vinculo_delincuencia,
     "enfermedad_cronica": enfermedad_cronica,
-    "consumo_sustancias": consumo_sustancias,
-    "consumo_reciente": consumo_reciente,
-    "riesgo_suicidio_alto": riesgo_suicidio_alto
+    "diagnostico_psiquiatrico_riesgoso": diagnostico_psiquiatrico_riesgoso,
+    "consumo_sustancias_reciente": consumo_sustancias_reciente,
+    "riesgo_suicidio": riesgo_suicidio
 }
 
 if st.button("Evaluar Ingreso"):
     resultado = evaluar_ingreso(datos_mujer)
     st.write(f"**Resultado:** {resultado}")
+
